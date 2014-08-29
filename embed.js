@@ -1,5 +1,9 @@
 (function () {
-  if (!window.GIDEO) {
+  function supportsAutoplay() {
+    return !navigator.userAgent.match(/(iPod|iPhone|iPad)/);
+  }
+
+  if (!window.GIDEO && supportsAutoplay()) {
     window.GIDEO = true;
 
     function listen(eventName, elem, func) {
@@ -62,7 +66,7 @@
 
   // Force mute in browsers with flash fallback
   var embeds = document.querySelectorAll('.gideo'),
-    mute = function () { this.muted(true); }
+    mute = function () { this.muted(supportsAutoplay()); }
 
   for (var i = 0; i < embeds.length; i++) {
     if (!embeds[i].player) {
