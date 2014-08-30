@@ -1,0 +1,251 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Gideo / DIY gideo hosting</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.1/normalize.min.css">
+    <link rel="stylesheet" href="//abpetkov.github.io/switchery/dist/switchery.min.css">
+    <style>
+      body {
+        padding: 3em;
+      }
+      a {
+        color: #fec200;
+        text-decoration: none;
+        border-bottom: 2px solid;
+      }
+      p {
+        font-size: 1.2em;
+        line-height: 1.5;
+      }
+      .pronunciation a {
+        color: #000;
+        border-bottom: 1px dotted;
+      }
+      label {
+        font-size: 1.2em;
+        cursor: pointer;
+        display: block;
+        font-weight: bold;
+        line-height: 1.5;
+        margin-bottom: 1em;
+      }
+      input, textarea {
+        width: 100%;
+        border: none;
+        display: block;
+        font-weight: normal;
+        color: #999;
+      }
+      input {
+        padding: 0;
+        font-size: 1.1em;
+        border-bottom: 2px solid #ccc;
+        height: 2.6em;
+      }
+      .toggle {
+        margin-bottom: 2em;
+      }
+      textarea {
+        padding: 0.8em;
+        font-size: 0.8em;
+        background: #f0f0f0;
+        box-sizing: border-box;
+        height: 300px;
+      }
+      input:focus, textarea:focus {
+        border-color: #999;
+        outline: none;
+      }
+      .half-input {
+        width: 50%;
+        display: inline-block;
+      }
+      .intro {
+        width: 100%;
+        height: 200px;
+      }
+      .container {
+        white-space: nowrap;
+      }
+      form {
+        width: 500px;
+        display: inline-block;
+      }
+      .preview {
+        display: inline-block;
+        vertical-align:top;
+        padding: 0 3em;
+      }
+      .pull-right {
+        float: right;
+      }
+    </style>
+
+    <script src="//vjs.zencdn.net/4.7/video.js"></script>
+    <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="1uwz35y8lrkjikb"></script>
+  </head>
+  <body>
+    <div class="intro">
+      <h1>Give a video, get a gideo.</h1>
+
+      <p>
+        <strong>Gideo</strong>
+        <em class="pronunciation">
+          <a href="http://translate.google.com/translate_tts?ie=UTF-8&q=jideo&tl=en-us" target=”_blank”>/ˈdʒɪd iˌoʊ/</a> or
+          <a href="http://translate.google.com/translate_tts?ie=UTF-8&q=gideo&tl=en-us" target=”_blank”>/ˈɡɪd iˌoʊ/</a>
+        </em><br/>
+        A video that loops and autoplays. Usually a quick screencast,
+        feature demo or animation.<br/>
+        <a href="examples/">Check the examples</a>
+      </p>
+    </div>
+
+    <div class="container">
+      <form>
+        <label>
+          Video File (preferably MP4)
+          <a href="#" class="dropbox-btn pull-right">Choose from Dropbox</a>
+          <input type="url" name="source" class="source" value="https://www.dropbox.com/s/l2rabvrvojk35d4/discordia.mp4?raw=1">
+        </label>
+
+        <label>
+          Player Size
+          <div>
+            <input type="number" name="player-width" class="player-width half-input" value="360">
+            <input type="number" name="player-height" class="player-height half-input" value="360">
+          </div>
+        </label>
+
+        <label>
+          Aspect Ratio
+          <div>
+            <input type="number" name="aspect-width" class="aspect-width half-input" value="16">
+            <input type="number" name="aspect-height" class="aspect-height half-input" value="9">
+          </div>
+        </label>
+
+        <label for="audio-toggle">Mute Button</label>
+        <div class="toggle">
+          <input type="checkbox" name="audio-toggle" class="audio-toggle" checked>
+        </div>
+
+        <label>
+          Embed Code
+          <textarea class="embed-code" readonly></textarea>
+        </label>
+      </form>
+
+      <div class="preview"></div>
+    </div>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="//abpetkov.github.io/switchery/dist/switchery.min.js"></script>
+    <script>
+      (function () {
+        var source     = $(".source").val(),
+          playerWidth  = parseInt($(".player-width").val()),
+          playerHeight = parseInt($(".player-height").val()),
+          aspectWidth  = parseInt($(".aspect-width").val()),
+          aspectHeight = parseInt($(".aspect-height").val()),
+          audioToggle  = $(".audio-toggle").is(':checked');
+
+        new Switchery($(".audio-toggle")[0], { color: '#fec200' });
+
+        $("[data-sound]").click(function(e) {
+          var audio = new Audio();
+          audio.src = $(this).data("sound");
+          audio.play();
+        })
+
+        // Reduce a fraction by finding the Greatest Common Divisor and dividing by it (stackoverflow.com/a/4652513)
+        function reduce(numerator, denominator) {
+          var gcd = function gcd(a, b) {
+            return b ? gcd(b, a%b) : a;
+          };
+          gcd = gcd(numerator, denominator);
+          return [numerator/gcd, denominator/gcd];
+        }
+
+        function genEmbedCode(source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle) {
+          var videoWidth, videoHeight, marginLeft = 0, marginTop = 0;
+
+          if (aspectWidth < aspectHeight) {
+            videoWidth  = playerWidth;
+            videoHeight = Math.round(playerWidth * aspectHeight / aspectWidth);
+            marginTop   = -1 * Math.round((videoHeight - playerHeight) / 4);
+          } else {
+            videoWidth  = Math.round(playerHeight * aspectWidth / aspectHeight);
+            videoHeight = playerHeight;
+            marginLeft  = -1 * Math.round((videoWidth - playerWidth) / 4);
+          }
+
+          var muteBtn = audioToggle ? '<div class="gideo-mute" style="position:absolute; top:20px; left:20px; width:44px; height:36px; background:url(/off.png); cursor:pointer"></div>' : '';
+
+          return '<div class="gideo-wrapper" style="width:'+ playerWidth +'px; height:'+ playerHeight +'px; overflow:hidden; position:relative; background:#000"><script>document.createElement("video")<\/script><script src="//vjs.zencdn.net/4.7/video.js"><\/script>'+ muteBtn +'<video id="discordia" loop preload="auto" class="gideo video-js" width="'+ videoWidth +'" height="'+ videoHeight +'" style="width:'+ videoWidth +'px; height:'+ videoHeight +'px; margin-left:'+ marginLeft +'px; margin-top:'+ marginTop +'px"><source src="'+ source +'" type="video/mp4" /></video><script async src="/embed.js" charset="utf-8"><\/script></div>';
+        }
+
+        function updateEmbedCode() {
+          var code = genEmbedCode(source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle);
+          $(".embed-code").text(code);
+          $(".preview").html(code);
+        }
+
+        $(".source").change(function() {
+          source = $(this).val() || source;
+          console.log(source)
+          updateEmbedCode();
+        });
+
+        $(".dropbox-btn").click(function(e) {
+          e.preventDefault();
+
+          Dropbox.choose({
+            linkType: "preview",
+            multiselect: false,
+            extensions: ['.mp4', '.mov', '.m4v', '.mpg', '.mpeg'],
+            success: function(files) {
+              source = files[0].link.replace("dl=0", "raw=1");
+              $(".source").val(source);
+              updateEmbedCode();
+            }
+          });
+        });
+
+        $(".player-width").change(function() {
+          playerWidth = parseInt($(this).val()) || playerWidth;
+          updateEmbedCode();
+        });
+
+        $(".player-height").change(function() {
+          playerHeight = parseInt($(this).val()) || playerHeight;
+          updateEmbedCode();
+        });
+
+        $(".aspect-width, .aspect-height").change(function() {
+          var numerator = parseInt($(".aspect-width").val()),
+            denominator = parseInt($(".aspect-height").val()),
+            reduced = reduce(numerator, denominator);
+
+          aspectWidth  = reduced[0] || aspectWidth;
+          aspectHeight = reduced[1] || aspectHeight;
+
+          updateEmbedCode();
+        });
+
+        $(".audio-toggle").change(function() {
+          audioToggle = $(this).is(':checked');
+          updateEmbedCode();
+        });
+
+        $(".embed-code").focus(function() { $(this).select(); })
+          .mouseup(function (e) {e.preventDefault(); });
+
+        updateEmbedCode();
+      })();
+    </script>
+  </body>
+</html>
