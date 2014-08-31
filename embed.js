@@ -1,4 +1,11 @@
 (function () {
+  window.gideoRoot = window.gideoRoot || (
+    document.location.protocol + "//dmfrancisco.github.io/gideo/"
+  );
+
+  videojs.options.flash.swf = window.gideoRoot + "video-js.swf";
+
+
   function supportsAutoplay() {
     return !navigator.userAgent.match(/(iPod|iPhone|iPad)/);
   }
@@ -55,10 +62,10 @@
           catch (e) { /* Random error with the flash fallback */ }
 
           gideo.muted(false);
-          e.target.style.background = "url('/on.png')";
+          e.target.style.background = "url('"+ window.gideoRoot +"on.png')";
         } else {
           gideo.muted(true);
-          e.target.style.background = "url('/off.png')";
+          e.target.style.background = "url('"+ window.gideoRoot +"off.png')";
         }
       }
     });

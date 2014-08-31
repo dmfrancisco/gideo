@@ -146,6 +146,8 @@
     <script src="//abpetkov.github.io/switchery/dist/switchery.min.js"></script>
     <script>
       (function () {
+        window.gideoRoot = document.location.protocol + "//dmfrancisco.github.io/gideo/";
+
         var source     = $(".source").val(),
           playerWidth  = parseInt($(".player-width").val()),
           playerHeight = parseInt($(".player-height").val()),
@@ -183,9 +185,15 @@
             marginLeft  = -1 * Math.round((videoWidth - playerWidth) / 4);
           }
 
-          var muteBtn = audioToggle ? '<div class="gideo-mute" style="position:absolute; top:20px; left:20px; width:44px; height:36px; background:url(/off.png); cursor:pointer"></div>' : '';
+          var muteBtn = audioToggle ? '<div class="gideo-mute" style="position:absolute; top:20px; left:20px; width:44px; height:36px; background:url('+
+            window.gideoRoot +'off.png); cursor:pointer"></div>' : '';
 
-          return '<div class="gideo-wrapper" style="width:'+ playerWidth +'px; height:'+ playerHeight +'px; overflow:hidden; position:relative; background:#000"><script>document.createElement("video")<\/script><script src="//vjs.zencdn.net/4.7/video.js"><\/script>'+ muteBtn +'<video id="discordia" loop preload="auto" class="gideo video-js" width="'+ videoWidth +'" height="'+ videoHeight +'" style="width:'+ videoWidth +'px; height:'+ videoHeight +'px; margin-left:'+ marginLeft +'px; margin-top:'+ marginTop +'px"><source src="'+ source +'" type="video/mp4" /></video><script async src="/embed.js" charset="utf-8"><\/script></div>';
+          return '<div class="gideo-wrapper" style="width:'+ playerWidth +'px; height:'+ playerHeight +
+            'px; overflow:hidden; position:relative; background:#000"><script>document.createElement("video")<\/script>'+
+            muteBtn +'<video loop id="discordia" loop preload="auto" class="gideo video-js" width="'+ videoWidth +
+            '" height="'+ videoHeight +'" style="width:'+ videoWidth +'px; height:'+ videoHeight +
+            'px; margin-left:'+ marginLeft +'px; margin-top:'+ marginTop +'px"><source src="'+ source +
+            '" type="video/mp4" /></video><script async src="'+ window.gideoRoot +'gideo-0.0.1.min.js" charset="utf-8"><\/script></div>';
         }
 
         function updateEmbedCode() {
