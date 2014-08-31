@@ -86,7 +86,7 @@
     </style>
 
     <script src="//vjs.zencdn.net/4.7/video.js"></script>
-    <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="1uwz35y8lrkjikb"></script>
+    <script src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="1uwz35y8lrkjikb"></script>
   </head>
   <body>
     <div class="intro">
@@ -109,7 +109,7 @@
         <label>
           Video File (preferably MP4)
           <a href="#" class="dropbox-btn pull-right">Choose from Dropbox</a>
-          <input type="url" name="source" class="source" value="https://www.dropbox.com/s/l2rabvrvojk35d4/discordia.mp4?raw=1">
+          <input type="url" name="source" class="source" value="https://dl.dropboxusercontent.com/s/l2rabvrvojk35d4/discordia.mp4?raw=1">
         </label>
 
         <label>
@@ -196,7 +196,6 @@
 
         $(".source").change(function() {
           source = $(this).val() || source;
-          console.log(source)
           updateEmbedCode();
         });
 
@@ -208,7 +207,9 @@
             multiselect: false,
             extensions: ['.mp4', '.mov', '.m4v', '.mpg', '.mpeg'],
             success: function(files) {
-              source = files[0].link.replace("dl=0", "raw=1");
+              source = files[0].link
+                .replace("dl=0", "raw=1") // This should do but it seems loop won't work due to the redirect
+                .replace("www.dropbox.com", "dl.dropboxusercontent.com");
               $(".source").val(source);
               updateEmbedCode();
             }
