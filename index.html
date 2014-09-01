@@ -113,6 +113,11 @@
         </label>
 
         <label>
+          Unique ID
+          <input type="text" name="video-id" class="video-id">
+        </label>
+
+        <label>
           Player Size
           <div>
             <input type="number" name="player-width" class="player-width half-input" value="360">
@@ -148,7 +153,8 @@
       (function () {
         window.gideoRoot = document.location.protocol + "//dmfrancisco.github.io/gideo/";
 
-        var source     = $(".source").val(),
+        var videoId,
+          source       = $(".source").val(),
           playerWidth  = parseInt($(".player-width").val()),
           playerHeight = parseInt($(".player-height").val()),
           aspectWidth  = parseInt($(".aspect-width").val()),
@@ -172,7 +178,7 @@
           return [numerator/gcd, denominator/gcd];
         }
 
-        function genEmbedCode(source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle) {
+        function genEmbedCode(id, source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle) {
           var videoWidth, videoHeight, marginLeft = 0, marginTop = 0;
 
           if (aspectWidth < aspectHeight) {
@@ -190,17 +196,27 @@
 
           return '<div class="gideo-wrapper" style="width:'+ playerWidth +'px; height:'+ playerHeight +
             'px; overflow:hidden; position:relative; background:#000"><script>document.createElement("video")<\/script>'+
-            muteBtn +'<video loop id="discordia" loop preload="auto" class="gideo video-js" width="'+ videoWidth +
+            muteBtn +'<video loop id="'+ id +'" loop preload="auto" class="gideo video-js" width="'+ videoWidth +
             '" height="'+ videoHeight +'" style="width:'+ videoWidth +'px; height:'+ videoHeight +
             'px; margin-left:'+ marginLeft +'px; margin-top:'+ marginTop +'px"><source src="'+ source +
             '" type="video/mp4" /></video><script async src="'+ window.gideoRoot +'gideo-0.0.1.min.js" charset="utf-8"><\/script></div>';
         }
 
         function updateEmbedCode() {
-          var code = genEmbedCode(source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle);
+          var code = genEmbedCode(videoId, source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle);
           $(".embed-code").text(code);
           $(".preview").html(code);
         }
+
+        // Generate a random video ID. The ID is used when multiple videos
+        // are displayed in browsers that require the flash fallback
+        videoId = "gideo-" + Math.round(Math.random() * 1000 + 1000).toString(16);
+        $(".video-id").val(videoId);
+
+        $(".video-id").change(function() {
+          videoId = $(this).val() || videoId;
+          updateEmbedCode();
+        });
 
         $(".source").change(function() {
           source = $(this).val() || source;
