@@ -41,7 +41,7 @@
           continue;
         } else if (isVisible(embeds[i])) {
           if (gideo.paused()) {
-            try { if (embeds[i].readyState) gideo.currentTime(0); }
+            try { gideo.currentTime(0); }
             catch (e) { /* Random error with the flash fallback */ }
             gideo.play();
           }
