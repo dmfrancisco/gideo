@@ -1,6 +1,6 @@
 {
   "name": "Gideo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Minimal video player that loops and autoplays. A mix between GIFs and Vine. Useful for quick screencasts, feature demos or animations.",
   "dependencies": {
     "video.js": "~4.7.3"
