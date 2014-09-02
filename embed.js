@@ -1,17 +1,16 @@
 (function () {
-  window.gideoRoot = window.gideoRoot || (
-    document.location.protocol + "//dmfrancisco.github.io/gideo/"
-  );
-
-  videojs.options.flash.swf = window.gideoRoot + "video-js.swf";
-
-
-  function supportsAutoplay() {
-    return !navigator.userAgent.match(/(Android|iPod|iPhone|iPad)/);
-  }
-
-  if (!window.GIDEO && supportsAutoplay()) {
+  if (!window.GIDEO) {
     window.GIDEO = true;
+
+    window.gideoRoot = window.gideoRoot || (
+      document.location.protocol + "//dmfrancisco.github.io/gideo/"
+    );
+
+    videojs.options.flash.swf = window.gideoRoot + "video-js.swf";
+
+    function isMobile() {
+      return navigator.userAgent.match(/(Android|iPod|iPhone|iPad)/);
+    }
 
     function listen(eventName, elem, func) {
       if (elem.addEventListener) {
@@ -31,53 +30,70 @@
       );
     }
 
-    window.setInterval(function () {
-      var embeds = document.querySelectorAll('.gideo');
+    if (!isMobile()) {
+      window.setInterval(function () {
+        var embeds = document.querySelectorAll('.gideo');
 
-      for (var i = 0; i < embeds.length; i++) {
-        var gideo = embeds[i].player;
+        for (var i = 0; i < embeds.length; i++) {
+          var gideo = embeds[i].player;
 
-        if (!gideo) {
-          continue;
-        } else if (isVisible(embeds[i])) {
-          if (gideo.paused()) {
+          if (!gideo) {
+            continue;
+          } else if (isVisible(embeds[i])) {
+            if (gideo.paused()) {
+              try { gideo.currentTime(0); }
+              catch (e) { /* Random error with the flash fallback */ }
+              gideo.play();
+            }
+          } else if (!gideo.paused()) {
+            gideo.pause();
+          }
+        }
+      }, 1000);
+
+      listen("click", document.querySelector('body'), function (e) {
+        if (e.target.className === "gideo-mute") {
+          var gideo = e.target.nextSibling.player;
+
+          if (!gideo) {
+            return;
+          } else if (gideo.muted()) {
             try { gideo.currentTime(0); }
             catch (e) { /* Random error with the flash fallback */ }
-            gideo.play();
+
+            gideo.muted(false);
+            e.target.style.background = "url('"+ window.gideoRoot +"on.png')";
+          } else {
+            gideo.muted(true);
+            e.target.style.background = "url('"+ window.gideoRoot +"off.png')";
           }
-        } else if (!gideo.paused()) {
-          gideo.pause();
+        }
+      });
+
+    } else {
+      var buttons = document.querySelectorAll('.gideo-mute');
+
+      // Hide the mute button in mobile browsers
+      if (isMobile()) {
+        for (var i = 0; i < buttons.length; i++) {
+          buttons[i].style.display = 'none';
         }
       }
-    }, 1000);
+    }
 
-    listen("click", document.querySelector('body'), function (e) {
-      if (e.target.className === "gideo-mute") {
-        var gideo = e.target.nextSibling.player;
+    var embeds = document.querySelectorAll('.gideo');
 
-        if (!gideo) {
-          return;
-        } else if (gideo.muted()) {
-          try { gideo.currentTime(0); }
-          catch (e) { /* Random error with the flash fallback */ }
+    // Force mute (this is not done using the `muted` attribute in
+    // order to work in browsers that require the flash fallback)
+    function mute() {
+      this.muted(!isMobile());
+    }
 
-          gideo.muted(false);
-          e.target.style.background = "url('"+ window.gideoRoot +"on.png')";
-        } else {
-          gideo.muted(true);
-          e.target.style.background = "url('"+ window.gideoRoot +"off.png')";
-        }
+    // Initialize all videos
+    for (var i = 0; i < embeds.length; i++) {
+      if (!embeds[i].player) {
+        videojs(embeds[i]).ready(mute);
       }
-    });
-  }
-
-  // Force mute in browsers with flash fallback
-  var embeds = document.querySelectorAll('.gideo'),
-    mute = function () { this.muted(supportsAutoplay()); }
-
-  for (var i = 0; i < embeds.length; i++) {
-    if (!embeds[i].player) {
-      videojs(embeds[i]).ready(mute);
     }
   }
 })();
