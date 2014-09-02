@@ -7,7 +7,7 @@
 
 
   function supportsAutoplay() {
-    return !navigator.userAgent.match(/(iPod|iPhone|iPad)/);
+    return !navigator.userAgent.match(/(Android|iPod|iPhone|iPad)/);
   }
 
   if (!window.GIDEO && supportsAutoplay()) {
