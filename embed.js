@@ -49,7 +49,7 @@
           gideo.pause();
         }
       }
-    }, 100);
+    }, 1000);
 
     listen("click", document.querySelector('body'), function (e) {
       if (e.target.className === "gideo-mute") {
