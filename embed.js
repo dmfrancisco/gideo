@@ -89,21 +89,6 @@
           + " cursor: pointer }");
     }
 
-    var embeds = document.querySelectorAll('.gideo');
-
-    // Force mute (this is not done using the `muted` attribute in
-    // order to work in browsers that require the flash fallback)
-    function mute() {
-      this.muted(!isMobile());
-    }
-
-    // Initialize all videos
-    for (var i = 0; i < embeds.length; i++) {
-      if (!embeds[i].player) {
-        videojs(embeds[i]).ready(mute);
-      }
-    }
-
     // Inject styles for the play button (for devices without autoplay)
     injectStyles(""
       + " .gideo .vjs-big-play-button {"
@@ -113,5 +98,20 @@
         + " background: url("+ window.gideoRoot +"sprites.png) -44px 0 }"
       + " .gideo.vjs-has-started .vjs-big-play-button {"
         + " display: none }");
+  }
+
+  var embeds = document.querySelectorAll('.gideo');
+
+  // Force mute (this is not done using the `muted` attribute in
+  // order to work in browsers that require the flash fallback)
+  function mute() {
+    this.muted(!isMobile());
+  }
+
+  // Initialize all videos
+  for (var i = 0; i < embeds.length; i++) {
+    if (!embeds[i].player) {
+      videojs(embeds[i]).ready(mute);
+    }
   }
 })();
