@@ -1,4 +1,9 @@
+/*global videojs */
 (function () {
+  var isMobile = function () {
+    return navigator.userAgent.match(/(Android|iPod|iPhone|iPad)/);
+  };
+
   if (!window.GIDEO) {
     window.GIDEO = true;
 
@@ -8,41 +13,36 @@
 
     videojs.options.flash.swf = window.gideoRoot + "video-js.swf";
 
-    function isMobile() {
-      return navigator.userAgent.match(/(Android|iPod|iPhone|iPad)/);
-    }
-
-    function listen(eventName, elem, func) {
+    var listen = function (eventName, elem, func) {
       if (elem.addEventListener) {
         elem.addEventListener(eventName, func, false);
-      }
-      else if (elem.attachEvent) {
+      } else if (elem.attachEvent) {
         elem.attachEvent("on" + eventName, func);
       }
-    }
+    };
 
-    function isVisible(elem) {
+    var isVisible = function (elem) {
       var rect = elem.getBoundingClientRect();
 
       return (
         rect.top > -elem.offsetHeight &&
         rect.top < (window.innerHeight || document.documentElement.clientHeight)
       );
-    }
+    };
 
     // Add new CSS rules (based on goo.gl/Ygvaqy)
-    function injectStyles(rules) {
+    var injectStyles = function (rules) {
       var div = document.createElement('div');
       div.innerHTML = '&shy;<style>' + rules + '</style>';
       document.body.appendChild(div.childNodes[1]);
-    }
+    };
 
     if (!isMobile()) {
       window.setInterval(function () {
-        var embeds = document.querySelectorAll('.gideo');
+        var gideo, embeds = document.querySelectorAll('.gideo');
 
         for (var i = 0; i < embeds.length; i++) {
-          var gideo = embeds[i].player;
+          gideo = embeds[i].player;
 
           if (!gideo) {
             continue;
@@ -59,10 +59,10 @@
       }, 1000);
 
       listen("click", document.querySelector('body'), function (e) {
-        var target = e.target ? e.target : e.srcElement;
+        var gideo, target = e.target || e.srcElement;
 
         if (target.className === "gideo-mute") {
-          var gideo = target.nextSibling.player;
+          gideo = target.nextSibling.player;
 
           if (!gideo) {
             return;
@@ -75,7 +75,7 @@
             target.style.backgroundPosition = "0 0";
           }
         } else if (target.className === "gideo-replay") {
-          var gideo = target.previousSibling.player;
+          gideo = target.previousSibling.player;
           if (gideo) { gideo.currentTime(0); }
         }
       });
@@ -94,10 +94,10 @@
       // We don't autoplay (in mobile devices) but we still need to pause.
       // This is not necessary for iOS since videos open in a new window.
       window.setInterval(function () {
-        var embeds = document.querySelectorAll('.gideo');
+        var gideo, embeds = document.querySelectorAll('.gideo');
 
         for (var i = 0; i < embeds.length; i++) {
-          var gideo = embeds[i].player;
+          gideo = embeds[i].player;
           if (gideo && !isVisible(embeds[i])) { gideo.pause(); }
         }
       }, 1000);
@@ -118,9 +118,9 @@
 
   // Force mute (this is not done using the `muted` attribute in
   // order to work in browsers that require the flash fallback)
-  function mute() {
+  var mute = function () {
     this.muted(!isMobile());
-  }
+  };
 
   // Initialize all videos
   for (var i = 0; i < embeds.length; i++) {
