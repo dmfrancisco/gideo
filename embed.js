@@ -67,26 +67,28 @@
           if (!gideo) {
             return;
           } else if (gideo.muted()) {
-            try { gideo.currentTime(0); }
-            catch (e) { /* Random error with the flash fallback */ }
-
+            gideo.currentTime(0);
             gideo.muted(false);
             target.style.backgroundPosition = "0 -36px";
           } else {
             gideo.muted(true);
             target.style.backgroundPosition = "0 0";
           }
+        } else if (target.className === "gideo-replay") {
+          var gideo = target.previousSibling.player;
+          if (gideo) { gideo.currentTime(0); }
         }
       });
 
-      // Inject styles for the mute button
+      // Inject styles for controls
       injectStyles(""
-        + " .gideo-mute {"
+        + " .gideo-mute, .gideo-replay {"
           + " position: absolute; z-index: 2;"
-          + " top: 20px; left: 20px;"
-          + " width: 44px; height: 36px;"
+          + " width: 44px; height: 36px; left: 20px;"
           + " background: url("+ window.gideoRoot +"sprites.png);"
-          + " cursor: pointer }");
+          + " cursor: pointer }"
+        + " .gideo-mute { top: 20px }"
+        + " .gideo-replay { bottom: 20px; background-position: 0 -72px }");
     }
 
     // Inject styles for the play button (for devices without autoplay)
