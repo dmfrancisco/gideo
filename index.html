@@ -115,29 +115,34 @@
           <a href="#" class="dropbox-btn">Choose from Dropbox</a>
         </label>
         <div class="inputs">
-          <input type="url" id="source" class="source" value="https://dl.dropboxusercontent.com/s/l2rabvrvojk35d4/discordia.mp4?raw=1">
+          <input type="url" id="source" value="https://dl.dropboxusercontent.com/s/l2rabvrvojk35d4/discordia.mp4?raw=1">
         </div>
 
         <label for="video-id">Unique ID</label>
         <div class="inputs">
-          <input type="text" id="video-id" class="video-id">
+          <input type="text" id="video-id">
         </div>
 
         <label for="player-width">Player Size</label>
         <div class="inputs">
-          <input type="number" id="player-width" class="player-width half-input" value="360">
-          <input type="number" id="player-height" class="player-height half-input" value="360">
+          <input type="number" id="player-width" class="half-input" value="360">
+          <input type="number" id="player-height" class="half-input" value="360">
         </div>
 
         <label for="aspect-width">Aspect Ratio</label>
         <div class="inputs">
-          <input type="number" id="aspect-width" class="aspect-width half-input" value="16">
-          <input type="number" id="aspect-height" class="aspect-height half-input" value="9">
+          <input type="number" id="aspect-width" class="half-input" value="16">
+          <input type="number" id="aspect-height" class="half-input" value="9">
         </div>
 
         <label for="audio-toggle">Mute Button</label>
         <div class="inputs">
-          <input type="checkbox" id="audio-toggle" class="audio-toggle" checked>
+          <input type="checkbox" id="audio-toggle" checked>
+        </div>
+
+        <label for="replay-toggle">Play From Beginning Button</label>
+        <div class="inputs">
+          <input type="checkbox" id="replay-toggle">
         </div>
 
         <label for="embed-code">Embed Code</label>
@@ -159,10 +164,12 @@
           playerHeight = parseInt($("#player-height").val()),
           aspectWidth  = parseInt($("#aspect-width").val()),
           aspectHeight = parseInt($("#aspect-height").val()),
-          audioToggle  = $("#audio-toggle").is(':checked');
+          audioToggle  = $("#audio-toggle").is(':checked'),
+          replayToggle = $("#replay-toggle").is(':checked');
 
-        // Convert the audio (mute) checkbox to a toggle switch
+        // Convert checkboxes to a toggle switches
         new Switchery($("#audio-toggle")[0], { color: '#fec200' });
+        new Switchery($("#replay-toggle")[0], { color: '#fec200' });
 
         // Reduce a fraction by finding the Greatest Common Divisor and dividing by it (stackoverflow.com/a/4652513)
         function reduce(numerator, denominator) {
@@ -173,7 +180,7 @@
           return [numerator/gcd, denominator/gcd];
         }
 
-        function genEmbedCode(videoId, source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle) {
+        function genEmbedCode(videoId, source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle, replayToggle) {
           var version = "0.1", videoWidth, videoHeight, marginLeft = 0, marginTop = 0;
 
           if (aspectWidth < aspectHeight) {
@@ -187,17 +194,19 @@
           }
 
           var muteBtn = audioToggle ? '<div class="gideo-mute"></div>' : '';
+          var replayBtn = replayToggle ? '<div class="gideo-replay"></div>' : '';
 
           return '<div class="gideo-wrapper" style="width:'+ playerWidth +'px; height:'+ playerHeight +
             'px; overflow:hidden; position:relative; background:#000"><script>document.createElement("video")<\/script>'+
             muteBtn +'<video loop id="'+ videoId +'" loop preload="auto" class="gideo video-js" width="'+ videoWidth +
             '" height="'+ videoHeight +'" style="width:'+ videoWidth +'px; height:'+ videoHeight +
             'px; margin-left:'+ marginLeft +'px; margin-top:'+ marginTop +'px"><source src="'+ source +
-            '" type="video/mp4" /></video><script defer src="'+ window.gideoRoot +'gideo-'+ version +'.min.js" charset="utf-8"><\/script></div>';
+            '" type="video/mp4" /></video>'+ replayBtn +'<script defer src="'+ window.gideoRoot +'gideo-'+
+            version +'.min.js" charset="utf-8"><\/script></div>';
         }
 
         function updateEmbedCode() {
-          var code = genEmbedCode(videoId, source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle);
+          var code = genEmbedCode(videoId, source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle, replayToggle);
           $("#embed-code").text(code);
           $(".preview").html(code);
         }
@@ -258,6 +267,11 @@
 
         $("#audio-toggle").change(function() {
           audioToggle = $(this).is(':checked');
+          updateEmbedCode();
+        });
+
+        $("#replay-toggle").change(function() {
+          replayToggle = $(this).is(':checked');
           updateEmbedCode();
         });
 
