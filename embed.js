@@ -89,6 +89,18 @@
           + " cursor: pointer }"
         + " .gideo-mute { top: 20px }"
         + " .gideo-replay { bottom: 20px; background-position: 0 -72px }");
+
+    } else {
+      // We don't autoplay (in mobile devices) but we still need to pause.
+      // This is not necessary for iOS since videos open in a new window.
+      window.setInterval(function () {
+        var embeds = document.querySelectorAll('.gideo');
+
+        for (var i = 0; i < embeds.length; i++) {
+          var gideo = embeds[i].player;
+          if (gideo && !isVisible(embeds[i])) { gideo.pause(); }
+        }
+      }, 1000);
     }
 
     // Inject styles for the play button (for devices without autoplay)
@@ -98,7 +110,7 @@
         + " width: 68px; height: 68px;"
         + " top: 50%; left: 50%; margin: -34px auto auto -34px;"
         + " background: url("+ window.gideoRoot +"sprites.png) -44px 0 }"
-      + " .gideo.vjs-has-started .vjs-big-play-button {"
+      + " .gideo.vjs-playing .vjs-big-play-button {"
         + " display: none }");
   }
 
