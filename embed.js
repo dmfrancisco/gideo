@@ -71,10 +71,10 @@
             catch (e) { /* Random error with the flash fallback */ }
 
             gideo.muted(false);
-            target.style.background = "url('"+ window.gideoRoot +"on.png')";
+            target.style.backgroundPosition = "0 -36px";
           } else {
             gideo.muted(true);
-            target.style.background = "url('"+ window.gideoRoot +"off.png')";
+            target.style.backgroundPosition = "0 0";
           }
         }
       });
@@ -85,7 +85,7 @@
           + " position: absolute; z-index: 2;"
           + " top: 20px; left: 20px;"
           + " width: 44px; height: 36px;"
-          + " background: url('"+ window.gideoRoot +"off.png');"
+          + " background: url("+ window.gideoRoot +"sprites.png);"
           + " cursor: pointer }");
     }
 
@@ -110,7 +110,7 @@
         + " position: absolute; z-index: 2;"
         + " width: 68px; height: 68px;"
         + " top: 50%; left: 50%; margin: -34px auto auto -34px;"
-        + " background: url('"+ window.gideoRoot +"play.png') }"
+        + " background: url("+ window.gideoRoot +"sprites.png) -44px 0 }"
       + " .gideo.vjs-has-started .vjs-big-play-button {"
         + " display: none }");
   }
