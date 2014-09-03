@@ -265,15 +265,17 @@
           updateEmbedCode();
         });
 
-        $("#audio-toggle").change(function() {
+        // Use `onchange` instead of jQuery's `change` to avoid
+        // a bug from Switchery in IE11-
+        $("#audio-toggle")[0].onchange = function() {
           audioToggle = $(this).is(':checked');
           updateEmbedCode();
-        });
+        };
 
-        $("#replay-toggle").change(function() {
+        $("#replay-toggle")[0].onchange = function() {
           replayToggle = $(this).is(':checked');
           updateEmbedCode();
-        });
+        };
 
         // Select the content of the textarea on focus
         $("#embed-code").focus(function() { $(this).select(); })
