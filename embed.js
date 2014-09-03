@@ -79,15 +79,14 @@
         }
       });
 
-    } else {
-      var buttons = document.querySelectorAll('.gideo-mute');
-
-      // Hide the mute button in mobile browsers
-      if (isMobile()) {
-        for (var i = 0; i < buttons.length; i++) {
-          buttons[i].style.display = 'none';
-        }
-      }
+      // Inject styles for the mute button
+      injectStyles(""
+        + " .gideo-mute {"
+          + " position: absolute; z-index: 2;"
+          + " top: 20px; left: 20px;"
+          + " width: 44px; height: 36px;"
+          + " background: url('"+ window.gideoRoot +"off.png');"
+          + " cursor: pointer }");
     }
 
     var embeds = document.querySelectorAll('.gideo');
