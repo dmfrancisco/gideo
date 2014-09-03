@@ -52,8 +52,10 @@
       }, 1000);
 
       listen("click", document.querySelector('body'), function (e) {
-        if (e.target.className === "gideo-mute") {
-          var gideo = e.target.nextSibling.player;
+        var target = e.target ? e.target : e.srcElement;
+
+        if (target.className === "gideo-mute") {
+          var gideo = target.nextSibling.player;
 
           if (!gideo) {
             return;
@@ -62,10 +64,10 @@
             catch (e) { /* Random error with the flash fallback */ }
 
             gideo.muted(false);
-            e.target.style.background = "url('"+ window.gideoRoot +"on.png')";
+            target.style.background = "url('"+ window.gideoRoot +"on.png')";
           } else {
             gideo.muted(true);
-            e.target.style.background = "url('"+ window.gideoRoot +"off.png')";
+            target.style.background = "url('"+ window.gideoRoot +"off.png')";
           }
         }
       });
