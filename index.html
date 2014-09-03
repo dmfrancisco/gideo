@@ -174,7 +174,7 @@
         }
 
         function genEmbedCode(videoId, source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle) {
-          var videoWidth, videoHeight, marginLeft = 0, marginTop = 0;
+          var version = "0.1", videoWidth, videoHeight, marginLeft = 0, marginTop = 0;
 
           if (aspectWidth < aspectHeight) {
             videoWidth  = playerWidth;
@@ -186,15 +186,14 @@
             marginLeft  = -1 * Math.round((videoWidth - playerWidth) / 4);
           }
 
-          var muteBtn = audioToggle ? '<div class="gideo-mute" style="position:absolute; top:20px; left:20px; width:44px; height:36px; background:url('+
-            window.gideoRoot +'off.png); cursor:pointer"></div>' : '';
+          var muteBtn = audioToggle ? '<div class="gideo-mute"></div>' : '';
 
           return '<div class="gideo-wrapper" style="width:'+ playerWidth +'px; height:'+ playerHeight +
             'px; overflow:hidden; position:relative; background:#000"><script>document.createElement("video")<\/script>'+
             muteBtn +'<video loop id="'+ videoId +'" loop preload="auto" class="gideo video-js" width="'+ videoWidth +
             '" height="'+ videoHeight +'" style="width:'+ videoWidth +'px; height:'+ videoHeight +
             'px; margin-left:'+ marginLeft +'px; margin-top:'+ marginTop +'px"><source src="'+ source +
-            '" type="video/mp4" /></video><script async src="'+ window.gideoRoot +'gideo-0.0.2.min.js" charset="utf-8"><\/script></div>';
+            '" type="video/mp4" /></video><script defer src="'+ window.gideoRoot +'gideo-'+ version +'.min.js" charset="utf-8"><\/script></div>';
         }
 
         function updateEmbedCode() {
