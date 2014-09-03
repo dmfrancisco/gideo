@@ -30,6 +30,13 @@
       );
     }
 
+    // Add new CSS rules (based on goo.gl/Ygvaqy)
+    function injectStyles(rules) {
+      var div = document.createElement('div');
+      div.innerHTML = '&shy;<style>' + rules + '</style>';
+      document.body.appendChild(div.childNodes[1]);
+    }
+
     if (!isMobile()) {
       window.setInterval(function () {
         var embeds = document.querySelectorAll('.gideo');
@@ -97,5 +104,15 @@
         videojs(embeds[i]).ready(mute);
       }
     }
+
+    // Inject styles for the play button (for devices without autoplay)
+    injectStyles(""
+      + " .gideo .vjs-big-play-button {"
+        + " position: absolute; z-index: 2;"
+        + " width: 68px; height: 68px;"
+        + " top: 50%; left: 50%; margin: -34px auto auto -34px;"
+        + " background: url('"+ window.gideoRoot +"play.png') }"
+      + " .gideo.vjs-has-started .vjs-big-play-button {"
+        + " display: none }");
   }
 })();
