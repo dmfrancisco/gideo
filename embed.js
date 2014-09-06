@@ -4,14 +4,12 @@
     return navigator.userAgent.match(/(Android|iPod|iPhone|iPad)/);
   };
 
-  if (!window.GIDEO) {
-    window.GIDEO = true;
+  if (!window.gideoIncluded) {
+    window.gideoIncluded = true;
 
     window.gideoRoot = window.gideoRoot || (
       document.location.protocol + "//dmfrancisco.github.io/gideo/"
     );
-
-    videojs.options.flash.swf = window.gideoRoot + "video-js.swf";
 
     var listen = function (eventName, elem, func) {
       if (elem.addEventListener) {
@@ -46,7 +44,7 @@
 
           if (!gideo) {
             continue;
-          } else if (isVisible(embeds[i])) {
+          } else if (isVisible(embeds[i].parentNode)) {
             if (gideo.paused()) {
               try { gideo.currentTime(0); }
               catch (e) { /* Random error with the flash fallback */ }
@@ -62,7 +60,7 @@
         var gideo, target = e.target || e.srcElement;
 
         if (target.className === "gideo-mute") {
-          gideo = target.nextSibling.player;
+          gideo = target.parentNode.querySelector('.gideo').player;
 
           if (!gideo) {
             return;
@@ -75,7 +73,7 @@
             target.style.backgroundPosition = "0 0";
           }
         } else if (target.className === "gideo-replay") {
-          gideo = target.previousSibling.player;
+          gideo = target.parentNode.querySelector('.gideo').player;
           if (gideo) { gideo.currentTime(0); }
         }
       });
@@ -98,10 +96,13 @@
 
         for (var i = 0; i < embeds.length; i++) {
           gideo = embeds[i].player;
-          if (gideo && !isVisible(embeds[i])) { gideo.pause(); }
+          if (gideo && !isVisible(embeds[i].parentNode)) { gideo.pause(); }
         }
       }, 1000);
     }
+
+    // Setup path to flash fallback from Video.js
+    videojs.options.flash.swf = window.gideoRoot + "video-js.swf";
 
     // Inject styles for the play button (for devices without autoplay)
     injectStyles(""
@@ -114,18 +115,22 @@
         + " display: none }");
   }
 
-  var embeds = document.querySelectorAll('.gideo');
-
-  // Force mute (this is not done using the `muted` attribute in
-  // order to work in browsers that require the flash fallback)
-  var mute = function () {
+  var onready = function () {
+    // Force mute (this is not done using the `muted` attribute in
+    // order to work in browsers that require the flash fallback)
     this.muted(!isMobile());
   };
+
+  window.gideoInit = window.gideoInit || function (video, success) {
+    videojs(video).ready(success);
+  };
+
+  var embeds = document.querySelectorAll('.gideo');
 
   // Initialize all videos
   for (var i = 0; i < embeds.length; i++) {
     if (!embeds[i].player) {
-      videojs(embeds[i]).ready(mute);
+      window.gideoInit(embeds[i], onready);
     }
   }
 })();
