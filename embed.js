@@ -1,41 +1,44 @@
 /*global videojs */
-(function () {
-  var isMobile = function () {
-    return navigator.userAgent.match(/(Android|iPod|iPhone|iPad)/);
-  };
 
+(function () {
   if (!window.gideoIncluded) {
     window.gideoIncluded = true;
 
-    window.gideoRoot = window.gideoRoot || (
-      document.location.protocol + "//dmfrancisco.github.io/gideo/"
-    );
+    var Helper = {
+      listen: function (eventName, elem, func) {
+        if (elem.addEventListener) {
+          elem.addEventListener(eventName, func, false);
+        } else if (elem.attachEvent) {
+          elem.attachEvent("on" + eventName, func);
+        }
+      },
 
-    var listen = function (eventName, elem, func) {
-      if (elem.addEventListener) {
-        elem.addEventListener(eventName, func, false);
-      } else if (elem.attachEvent) {
-        elem.attachEvent("on" + eventName, func);
+      isVisible: function (elem) {
+        var rect = elem.getBoundingClientRect();
+
+        return (
+          rect.top > -elem.offsetHeight &&
+          rect.top < (window.innerHeight || document.documentElement.clientHeight)
+        );
+      },
+
+      // Add new CSS rules (based on goo.gl/Ygvaqy)
+      injectStyles: function (rules) {
+        var div = document.createElement('div');
+        div.innerHTML = '&shy;<style>' + rules + '</style>';
+        document.body.appendChild(div.childNodes[1]);
+      },
+
+      isMobile: function () {
+        return navigator.userAgent.match(/(Android|iPod|iPhone|iPad)/);
       }
-    };
+    }
 
-    var isVisible = function (elem) {
-      var rect = elem.getBoundingClientRect();
+    // Configurations
+    window.gideoRoot = window.gideoRoot || "//dmfrancisco.github.io/gideo/";
+    window.gideoMode = window.gideoMode || (Helper.isMobile() ? "manual" : "autoplayer");
 
-      return (
-        rect.top > -elem.offsetHeight &&
-        rect.top < (window.innerHeight || document.documentElement.clientHeight)
-      );
-    };
-
-    // Add new CSS rules (based on goo.gl/Ygvaqy)
-    var injectStyles = function (rules) {
-      var div = document.createElement('div');
-      div.innerHTML = '&shy;<style>' + rules + '</style>';
-      document.body.appendChild(div.childNodes[1]);
-    };
-
-    if (!isMobile()) {
+    var runAutoplayerMode = function () {
       window.setInterval(function () {
         var gideo, embeds = document.querySelectorAll('.gideo');
 
@@ -44,7 +47,7 @@
 
           if (!gideo) {
             continue;
-          } else if (isVisible(embeds[i].parentNode)) {
+          } else if (Helper.isVisible(embeds[i].parentNode)) {
             if (gideo.paused()) {
               try { gideo.currentTime(0); }
               catch (e) { /* Random error with the flash fallback */ }
@@ -56,7 +59,7 @@
         }
       }, 1000);
 
-      listen("click", document.querySelector('body'), function (e) {
+      Helper.listen("click", document.querySelector('body'), function (e) {
         var gideo, target = e.target || e.srcElement;
 
         if (target.className === "gideo-mute") {
@@ -79,7 +82,7 @@
       });
 
       // Inject styles for controls
-      injectStyles(""
+      Helper.injectStyles(""
         + " .gideo-mute, .gideo-replay {"
           + " position: absolute; z-index: 2;"
           + " width: 44px; height: 36px; left: 20px;"
@@ -87,25 +90,36 @@
           + " cursor: pointer }"
         + " .gideo-mute { top: 20px }"
         + " .gideo-replay { bottom: 20px; background-position: 0 -72px }");
+    }
 
-    } else {
-      // We don't autoplay (in mobile devices) but we still need to pause.
+    var runManualMode = function () {
+      // This mode doesn't autoplay but still needs to pause.
       // This is not necessary for iOS since videos open in a new window.
       window.setInterval(function () {
         var gideo, embeds = document.querySelectorAll('.gideo');
 
         for (var i = 0; i < embeds.length; i++) {
           gideo = embeds[i].player;
-          if (gideo && !isVisible(embeds[i].parentNode)) { gideo.pause(); }
+          if (gideo && !Helper.isVisible(embeds[i].parentNode)) {
+            gideo.pause();
+          }
         }
       }, 1000);
+    }
+
+    switch(gideoMode) {
+      case "autoplayer":
+        runAutoplayerMode();
+        break;
+      case "manual":
+        runManualMode();
     }
 
     // Setup path to flash fallback from Video.js
     videojs.options.flash.swf = window.gideoRoot + "video-js.swf";
 
     // Inject styles for the play button (for devices without autoplay)
-    injectStyles(""
+    Helper.injectStyles(""
       + " .gideo .vjs-big-play-button {"
         + " position: absolute; z-index: 2;"
         + " width: 68px; height: 68px;"
@@ -118,7 +132,9 @@
   var onready = function () {
     // Force mute (this is not done using the `muted` attribute in
     // order to work in browsers that require the flash fallback)
-    this.muted(!isMobile());
+    if (window.gideoMode === "autoplayer") {
+      this.muted(true);
+    }
   };
 
   window.gideoInit = window.gideoInit || function (video, success) {
