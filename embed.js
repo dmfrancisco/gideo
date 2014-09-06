@@ -4,35 +4,57 @@
   if (!window.gideoIncluded) {
     window.gideoIncluded = true;
 
-    var Helper = {
-      listen: function (eventName, elem, func) {
+    var Helper = (function () {
+      var self = {};
+
+      self.listen = function (eventName, elem, func) {
         if (elem.addEventListener) {
           elem.addEventListener(eventName, func, false);
         } else if (elem.attachEvent) {
           elem.attachEvent("on" + eventName, func);
         }
-      },
+      };
 
-      isVisible: function (elem) {
+      self.isVisible = function (elem) {
         var rect = elem.getBoundingClientRect();
 
         return (
           rect.top > -elem.offsetHeight &&
           rect.top < (window.innerHeight || document.documentElement.clientHeight)
         );
-      },
+      };
 
       // Add new CSS rules (based on goo.gl/Ygvaqy)
-      injectStyles: function (rules) {
+      self.injectStyles = function (rules) {
         var div = document.createElement('div');
         div.innerHTML = '&shy;<style>' + rules + '</style>';
         document.body.appendChild(div.childNodes[1]);
-      },
+      };
 
-      isMobile: function () {
+      // Class manipulation (from: openjs.com/scripts/dom/class_manipulation.php)
+      self.hasClass = function (elem, className) {
+        return elem.className.match(new RegExp('(\\s|^)'+ className +'(\\s|$)'));
+      };
+
+      self.addClass = function (elem, className) {
+        if (!self.hasClass(elem, className)) {
+          elem.className += " " + className;
+        }
+      };
+
+      self.removeClass = function (elem, className) {
+        if (self.hasClass(elem, className)) {
+          var regex = new RegExp('(\\s|^)'+ className +'(\\s|$)');
+          elem.className = elem.className.replace(regex, ' ');
+        }
+      };
+
+      self.isMobile = function () {
         return navigator.userAgent.match(/(Android|iPod|iPhone|iPad)/);
-      }
-    }
+      };
+
+      return self;
+    }());
 
     // Configurations
     window.gideoRoot = window.gideoRoot || "//dmfrancisco.github.io/gideo/";
@@ -90,7 +112,7 @@
           + " cursor: pointer }"
         + " .gideo-mute { top: 20px }"
         + " .gideo-replay { bottom: 20px; background-position: 0 -72px }");
-    }
+    };
 
     var runManualMode = function () {
       // This mode doesn't autoplay but still needs to pause.
@@ -102,43 +124,72 @@
           gideo = embeds[i].player;
           if (gideo && !Helper.isVisible(embeds[i].parentNode)) {
             gideo.pause();
+            Helper.removeClass(embeds[i], "gideo--playing");
           }
         }
       }, 1000);
-    }
 
-    switch(gideoMode) {
+      Helper.listen("click", document.querySelector('body'), function (e) {
+        var gideo, embed, target = e.target || e.srcElement;
+
+        if (target.className === "gideo-play") {
+          embed = target.parentNode.querySelector('.gideo');
+          gideo = embed.player;
+
+          if (gideo) {
+            gideo.play();
+            Helper.addClass(embed, "gideo--playing");
+          }
+        }
+      });
+
+      // Inject styles for the play button (for devices without autoplay)
+      Helper.injectStyles(""
+        + " .gideo-play {"
+          + " position: absolute; z-index: 2;"
+          + " width: 68px; height: 68px;"
+          + " top: 50%; left: 50%; margin: -34px auto auto -34px;"
+          + " background: url("+ window.gideoRoot +"sprites.png) -44px 0 }"
+        + " .gideo--playing ~ .gideo-play {"
+          + " display: none }");
+    };
+
+    switch(window.gideoMode) {
       case "autoplayer":
         runAutoplayerMode();
         break;
+
       case "manual":
         runManualMode();
     }
 
     // Setup path to flash fallback from Video.js
     videojs.options.flash.swf = window.gideoRoot + "video-js.swf";
-
-    // Inject styles for the play button (for devices without autoplay)
-    Helper.injectStyles(""
-      + " .gideo .vjs-big-play-button {"
-        + " position: absolute; z-index: 2;"
-        + " width: 68px; height: 68px;"
-        + " top: 50%; left: 50%; margin: -34px auto auto -34px;"
-        + " background: url("+ window.gideoRoot +"sprites.png) -44px 0 }"
-      + " .gideo.vjs-playing .vjs-big-play-button {"
-        + " display: none }");
   }
 
-  var onready = function () {
-    // Force mute (this is not done using the `muted` attribute in
-    // order to work in browsers that require the flash fallback)
-    if (window.gideoMode === "autoplayer") {
-      this.muted(true);
+  var beforeInit = function (domObject) {
+    switch(window.gideoMode) {
+      case "manual":
+        // Create a play button
+        var playButton = document.createElement("div");
+        playButton.className = "gideo-play";
+        domObject.parentNode.appendChild(playButton);
+    }
+  };
+
+  var onReady = function (media, domObject) {
+    switch(window.gideoMode) {
+      case "autoplayer":
+        // Force mute (this is not done using the `muted` attribute in
+        // order to work in browsers that require the flash fallback)
+        media.muted(true);
     }
   };
 
   window.gideoInit = window.gideoInit || function (video, success) {
-    videojs(video).ready(success);
+    videojs(video).ready(function() {
+      success(this, video);
+    });
   };
 
   var embeds = document.querySelectorAll('.gideo');
@@ -146,7 +197,8 @@
   // Initialize all videos
   for (var i = 0; i < embeds.length; i++) {
     if (!embeds[i].player) {
-      window.gideoInit(embeds[i], onready);
+      beforeInit(embeds[i]);
+      window.gideoInit(embeds[i], onReady);
     }
   }
 })();
