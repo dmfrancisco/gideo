@@ -16,10 +16,10 @@ version = {
 config = {
   vendor: {
     assets: [
-      './node_modules/video.js/dist/video-js/video-js.swf'
+      './node_modules/mediaelement/build/flashmediaelement.swf'
     ],
     scripts: [
-      './node_modules/video.js/dist/video-js/video.js'
+      './node_modules/mediaelement/build/mediaelement.min.js'
     ],
   },
   build: {

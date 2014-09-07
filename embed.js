@@ -70,12 +70,12 @@
           if (!gideo) {
             continue;
           } else if (Helper.isVisible(embeds[i].parentNode)) {
-            if (gideo.paused()) {
-              try { gideo.currentTime(0); }
+            if (gideo.isPaused()) {
+              try { gideo.setCurrentTime(0); }
               catch (e) { /* Random error with the flash fallback */ }
               gideo.play();
             }
-          } else if (!gideo.paused()) {
+          } else if (!gideo.isPaused()) {
             gideo.pause();
           }
         }
@@ -89,17 +89,17 @@
 
           if (!gideo) {
             return;
-          } else if (gideo.muted()) {
-            gideo.currentTime(0);
-            gideo.muted(false);
+          } else if (gideo.isMuted()) {
+            gideo.setCurrentTime(0);
+            gideo.setMuted(false);
             target.style.backgroundPosition = "0 -36px";
           } else {
-            gideo.muted(true);
+            gideo.setMuted(true);
             target.style.backgroundPosition = "0 0";
           }
         } else if (target.className === "gideo-replay") {
           gideo = target.parentNode.querySelector('.gideo').player;
-          if (gideo) { gideo.currentTime(0); }
+          if (gideo) { gideo.setCurrentTime(0); }
         }
       });
 
@@ -162,9 +162,6 @@
       case "manual":
         runManualMode();
     }
-
-    // Setup path to flash fallback from Video.js
-    videojs.options.flash.swf = window.gideoRoot + "video-js.swf";
   }
 
   var beforeInit = function (domObject) {
@@ -178,17 +175,31 @@
   };
 
   var onReady = function (media, domObject) {
+    if (domObject) { domObject.player = media; }
+
+    media.isMuted  = media.isMuted  || function() { return this.muted;  };
+    media.isPaused = media.isPaused || function() { return this.paused; };
+
+    // Loop (could be done using `loop` attr for HTML5 but not for flash)
+    if (typeof MediaElement !== 'undefined') {
+      media.addEventListener('ended', function (e) {
+        media.setCurrentTime(0);
+        media.play();
+      }, false);
+    }
+
     switch(window.gideoMode) {
       case "autoplayer":
         // Force mute (this is not done using the `muted` attribute in
         // order to work in browsers that require the flash fallback)
-        media.muted(true);
+        media.setMuted(true);
     }
   };
 
   window.gideoInit = window.gideoInit || function (video, success) {
-    videojs(video).ready(function() {
-      success(this, video);
+    new MediaElement(video, {
+      success: success,
+      plugins: ['flash', 'vimeo']
     });
   };
 

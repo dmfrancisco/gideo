@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Minimal video player that loops and autoplays. A mix between GIFs and Vine. Useful for quick screencasts, feature demos or animations.",
   "dependencies": {
-    "video.js": "~4.7.3"
+    "mediaelement": "git://github.com/johndyer/mediaelement.git#2.15.1"
   },
   "devDependencies": {
     "gulp": "^3.5.6",
