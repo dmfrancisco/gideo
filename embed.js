@@ -196,6 +196,10 @@
         playButton.className = "gideo-play";
         domObject.parentNode.appendChild(playButton);
     }
+
+    if (typeof window.gideoBeforeInit === 'function') {
+      window.gideoBeforeInit(domObject);
+    }
   };
 
   var afterInit = function (media, domObject) {
@@ -217,6 +221,10 @@
         // Force mute (this is not done using the `muted` attribute in
         // order to work in browsers that require the flash fallback)
         media.setMuted(true);
+    }
+
+    if (typeof window.gideoAfterInit === 'function') {
+      window.gideoAfterInit(media, domObject);
     }
   };
 
