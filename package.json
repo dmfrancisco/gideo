@@ -1,7 +1,11 @@
 {
   "name": "Gideo",
   "version": "0.1.0",
-  "description": "Minimal video player that loops and autoplays. A mix between GIFs and Vine. Useful for quick screencasts, feature demos or animations.",
+  "description": "Minimal video player that loops and autoplays",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dmfrancisco/gideo.git"
+  },
   "dependencies": {
     "mediaelement": "git://github.com/johndyer/mediaelement.git#2.15.1"
   },
