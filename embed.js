@@ -1,8 +1,10 @@
 /*global videojs */
 
 (function () {
-  if (!window.gideoIncluded) {
-    window.gideoIncluded = true;
+  window._gideo = window._gideo || {};
+
+  if (!window._gideo.included) {
+    window._gideo.included = true;
 
     var Helper = (function () {
       var self = {};
@@ -49,6 +51,26 @@
         }
       };
 
+      self.loadScript = function (url, callback) {
+        var script = document.createElement('script');
+
+        if (script.readyState) { // IE
+          script.onreadystatechange = function () {
+            if (script.readyState == 'loaded' || script.readyState == 'complete') {
+              script.onreadystatechange = null;
+              callback();
+            }
+          };
+        } else { // Others
+          script.onload = function () {
+            callback();
+          };
+        }
+
+        script.src = url;
+        document.getElementsByTagName('head')[0].appendChild(script);
+      };
+
       self.isMobile = function () {
         return navigator.userAgent.match(/(Android|iPod|iPhone|iPad)/);
       };
@@ -58,7 +80,9 @@
 
     // Configurations
     window.gideoRoot = window.gideoRoot || "//dmfrancisco.github.io/gideo/";
+    window.gideoPolyfill = window.gideoPolyfill || (window.gideoRoot + "mediaelement.min.js");
     window.gideoMode = window.gideoMode || (Helper.isMobile() ? "manual" : "autoplayer");
+    window._gideo.helpers = Helper;
 
     var runAutoplayerMode = function () {
       window.setInterval(function () {
@@ -154,7 +178,7 @@
           + " display: none }");
     };
 
-    switch(window.gideoMode) {
+    switch (window.gideoMode) {
       case "autoplayer":
         runAutoplayerMode();
         break;
@@ -165,7 +189,7 @@
   }
 
   var beforeInit = function (domObject) {
-    switch(window.gideoMode) {
+    switch (window.gideoMode) {
       case "manual":
         // Create a play button
         var playButton = document.createElement("div");
@@ -174,7 +198,7 @@
     }
   };
 
-  var onReady = function (media, domObject) {
+  var afterInit = function (media, domObject) {
     if (domObject) { domObject.player = media; }
 
     media.isMuted  = media.isMuted  || function() { return this.muted;  };
@@ -188,7 +212,7 @@
       }, false);
     }
 
-    switch(window.gideoMode) {
+    switch (window.gideoMode) {
       case "autoplayer":
         // Force mute (this is not done using the `muted` attribute in
         // order to work in browsers that require the flash fallback)
@@ -199,17 +223,27 @@
   window.gideoInit = window.gideoInit || function (video, success) {
     new MediaElement(video, {
       success: success,
+      pluginPath: window.gideoRoot,
       plugins: ['flash', 'vimeo']
     });
   };
 
-  var embeds = document.querySelectorAll('.gideo');
-
   // Initialize all videos
-  for (var i = 0; i < embeds.length; i++) {
-    if (!embeds[i].player) {
-      beforeInit(embeds[i]);
-      window.gideoInit(embeds[i], onReady);
+  var initAll = function () {
+    var embeds = document.querySelectorAll('.gideo');
+
+    for (var i = 0; i < embeds.length; i++) {
+      if (!embeds[i].loading) {
+        embeds[i].loading = true;
+        beforeInit(embeds[i]);
+        window.gideoInit(embeds[i], afterInit);
+      }
     }
+  }
+
+  if (typeof MediaElement === 'undefined') {
+    window._gideo.helpers.loadScript(window.gideoPolyfill, initAll);
+  } else {
+    initAll();
   }
 })();

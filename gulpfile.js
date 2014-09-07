@@ -14,43 +14,27 @@ version = {
 };
 
 config = {
-  vendor: {
-    assets: [
-      './node_modules/mediaelement/build/flashmediaelement.swf'
-    ],
-    scripts: [
-      './node_modules/mediaelement/build/mediaelement.min.js'
-    ],
-  },
-  build: {
-    src: [
-      './embed.js'
-    ],
-    dest: 'embed.min.js'
-  },
+  vendor: [
+    './node_modules/mediaelement/build/flashmediaelement.swf',
+    './node_modules/mediaelement/build/mediaelement.min.js'
+  ],
+  build: [
+    './embed.js'
+  ],
   dist: ('gideo-'+ version.majorMinor +'.min.js'),
   banner: "/** <%= pkg.name %> v<%= pkg.version %> */\n"
 }
 
-// Copy vendor assets
-gulp.task('copy-assets', function () {
-  return gulp.src(config.vendor.assets)
+// Copy vendor assets and scripts
+gulp.task('copy-dependencies', function () {
+  return gulp.src(config.vendor)
     .pipe(gulp.dest('.'));
 });
 
 // Minify and concatenate application scripts
 gulp.task('build', function() {
-  return gulp.src(config.build.src)
+  return gulp.src(config.build)
     .pipe(uglify())
-    .pipe(concat(config.build.dest))
-    .pipe(gulp.dest('.'));
-});
-
-// Concatenate application and vendor scripts
-gulp.task('dist', ['build'], function() {
-  return gulp.src(
-      config.vendor.scripts.concat([ config.build.dest ])
-    )
     .pipe(concat(config.dist))
     .pipe(header(config.banner, { pkg: pkg }))
     .pipe(gulp.dest('.'));
@@ -58,8 +42,8 @@ gulp.task('dist', ['build'], function() {
 
 // Rerun the tasks when a file changes
 gulp.task('watch', ['default'], function(fn) {
-  gulp.watch(config.build.src, ['dist']);
+  gulp.watch(config.build, ['build']);
 });
 
 // The default task (called when you run `gulp` from cli)
-gulp.task('default', ['copy-assets', 'dist']);
+gulp.task('default', ['copy-dependencies', 'build']);
