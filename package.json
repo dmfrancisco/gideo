@@ -1,6 +1,6 @@
 {
   "name": "Gideo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Minimal video player that loops and autoplays",
   "repository": {
     "type": "git",
