@@ -87,7 +87,6 @@
       }
     </style>
 
-    <script src="//vjs.zencdn.net/4.7/video.js"></script>
     <script src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="1uwz35y8lrkjikb"></script>
   </head>
   <body>
@@ -181,28 +180,30 @@
         }
 
         function genEmbedCode(videoId, source, playerWidth, playerHeight, aspectWidth, aspectHeight, audioToggle, replayToggle) {
-          var version = "0.1", videoWidth, videoHeight, marginLeft = 0, marginTop = 0;
+          var version = "0.2", videoWidth, videoHeight, marginLeft = 0, marginTop = 0;
 
           if (aspectWidth < aspectHeight) {
             videoWidth  = playerWidth;
             videoHeight = Math.round(playerWidth * aspectHeight / aspectWidth);
-            marginTop   = -1 * Math.round((videoHeight - playerHeight) / 4);
+            marginTop   = -1 * Math.round((videoHeight - playerHeight) / 2);
           } else {
             videoWidth  = Math.round(playerHeight * aspectWidth / aspectHeight);
             videoHeight = playerHeight;
-            marginLeft  = -1 * Math.round((videoWidth - playerWidth) / 4);
+            marginLeft  = -1 * Math.round((videoWidth - playerWidth) / 2);
           }
 
           var muteBtn = audioToggle ? '<div class="gideo-mute"></div>' : '';
           var replayBtn = replayToggle ? '<div class="gideo-replay"></div>' : '';
 
-          return '<div class="gideo-wrapper" style="width:'+ playerWidth +'px; height:'+ playerHeight +
-            'px; overflow:hidden; position:relative; background:#000"><script>document.createElement("video")<\/script>'+
-            muteBtn +'<video id="'+ videoId +'" loop preload="auto" class="gideo video-js" width="'+ videoWidth +
-            '" height="'+ videoHeight +'" style="width:'+ videoWidth +'px; height:'+ videoHeight +
-            'px; margin-left:'+ marginLeft +'px; margin-top:'+ marginTop +'px"><source src="'+ source +
-            '" type="video/mp4" /></video>'+ replayBtn +'<script defer src="'+ window.gideoRoot +'gideo-'+
-            version +'.min.js" charset="utf-8"><\/script></div>';
+          return '<div class="gideo-wrapper" style="width:'+ playerWidth +'px; height:'
+            + playerHeight +'px; overflow:hidden; position:relative; background:#000">'
+            + '<script>document.createElement("video")<\/script>'+ muteBtn
+            + '<div style="margin-left:'+ marginLeft +'px; margin-top:'+ marginTop +'px">'
+            + '<video id="'+ videoId +'" loop preload="auto" class="gideo" width="'
+            + videoWidth +'" height="'+ videoHeight +'" style="width:'+ videoWidth
+            + 'px; height:'+ videoHeight +'px">'+ '<source src="'+ source
+            + '" type="video/mp4" /></video></div>'+ replayBtn +'<script defer src="'
+            + window.gideoRoot +'gideo-'+ version +'.min.js" charset="utf-8"><\/script></div>';
         }
 
         function updateEmbedCode() {
