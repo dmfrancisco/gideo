@@ -1,4 +1,4 @@
-/*global videojs */
+/*global MediaElement */
 
 (function () {
   window._gideo = window._gideo || {};
@@ -81,6 +81,7 @@
     // Configurations
     window.gideoRoot = window.gideoRoot || "//dmfrancisco.github.io/gideo/";
     window.gideoPolyfill = window.gideoPolyfill || (window.gideoRoot + "mediaelement.min.js");
+    window.gideoPolyfillLoaded = function () { return typeof MediaElement !== 'undefined'; };
     window.gideoMode = window.gideoMode || (Helper.isMobile() ? "manual" : "autoplayer");
     window._gideo.helpers = Helper;
 
@@ -210,7 +211,7 @@
 
     // Loop (could be done using `loop` attr for HTML5 but not for flash)
     if (typeof MediaElement !== 'undefined') {
-      media.addEventListener('ended', function (e) {
+      media.addEventListener('ended', function () {
         media.setCurrentTime(0);
         media.play();
       }, false);
@@ -247,11 +248,14 @@
         window.gideoInit(embeds[i], afterInit);
       }
     }
-  }
 
-  if (typeof MediaElement === 'undefined') {
+    window._gideo.state = 2; // Loaded
+  };
+
+  if (!window._gideo.state && !window.gideoPolyfillLoaded()) {
+    window._gideo.state = 1; // Loading
     window._gideo.helpers.loadScript(window.gideoPolyfill, initAll);
-  } else {
+  } else if (window._gideo.state == 2) {
     initAll();
   }
 })();
