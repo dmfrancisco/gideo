@@ -15,7 +15,7 @@ version = {
 
 config = {
   vendor: [
-    './node_modules/mediaelement/build/flashmediaelement.swf',
+    './node_modules/mediaelement/build/flashmediaelement-cdn.swf',
     './node_modules/mediaelement/build/mediaelement.min.js'
   ],
   build: [

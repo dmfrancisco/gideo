@@ -233,6 +233,7 @@
     new MediaElement(video, {
       success: success,
       pluginPath: window.gideoRoot,
+      flashName: 'flashmediaelement-cdn.swf',
       plugins: ['flash', 'vimeo']
     });
   };
